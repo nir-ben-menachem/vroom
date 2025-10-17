@@ -38,13 +38,13 @@ bool PriorityReplace::is_valid() {
   bool valid = cvrp::PriorityReplace::is_valid();
 
   if (valid) {
-    std::vector<Index> job_ranks({_u});
+    const std::array job_ranks{_u};
     replace_start_valid =
       replace_start_valid &&
       _tw_s_route.is_valid_addition_for_tw(_input,
                                            _input.jobs[_u].delivery,
-                                           job_ranks.begin(),
-                                           job_ranks.end(),
+                                           job_ranks.cbegin(),
+                                           job_ranks.cend(),
                                            0,
                                            s_rank + 1);
 
@@ -52,8 +52,8 @@ bool PriorityReplace::is_valid() {
       replace_end_valid &&
       _tw_s_route.is_valid_addition_for_tw(_input,
                                            _input.jobs[_u].delivery,
-                                           job_ranks.begin(),
-                                           job_ranks.end(),
+                                           job_ranks.cbegin(),
+                                           job_ranks.cend(),
                                            t_rank,
                                            s_route.size());
 
@@ -67,7 +67,7 @@ void PriorityReplace::apply() {
   assert(_unassigned.contains(_u));
   _unassigned.erase(_u);
 
-  const std::vector<Index> addition({_u});
+  const std::array addition{_u};
 
   assert(replace_start_valid xor replace_end_valid);
 
@@ -80,8 +80,8 @@ void PriorityReplace::apply() {
 
     _tw_s_route.replace(_input,
                         _input.jobs[_u].delivery,
-                        addition.begin(),
-                        addition.end(),
+                        addition.cbegin(),
+                        addition.cend(),
                         0,
                         s_rank + 1);
   } else {
@@ -93,8 +93,8 @@ void PriorityReplace::apply() {
 
     _tw_s_route.replace(_input,
                         _input.jobs[_u].delivery,
-                        addition.begin(),
-                        addition.end(),
+                        addition.cbegin(),
+                        addition.cend(),
                         t_rank,
                         s_route.size());
   }

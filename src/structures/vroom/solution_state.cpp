@@ -79,20 +79,17 @@ template <class Solution> void SolutionState::setup(const Solution& sol) {
 }
 
 void SolutionState::update_costs(const std::vector<Index>& route, Index v) {
-  fwd_costs[v] =
-    std::vector<std::vector<Eval>>(_nb_vehicles,
-                                   std::vector<Eval>(route.size()));
-  bwd_costs[v] =
-    std::vector<std::vector<Eval>>(_nb_vehicles,
-                                   std::vector<Eval>(route.size()));
+  fwd_costs[v].resize(_nb_vehicles);
+  bwd_costs[v].resize(_nb_vehicles);
+
+  for (Index v_rank = 0; v_rank < _nb_vehicles; ++v_rank) {
+    fwd_costs[v][v_rank].resize(route.size());
+    bwd_costs[v][v_rank].resize(route.size());
+  }
 
   Index previous_index = 0; // dummy init
   if (!route.empty()) {
     previous_index = _input.jobs[route[0]].index();
-    for (Index v_rank = 0; v_rank < _nb_vehicles; ++v_rank) {
-      fwd_costs[v][v_rank][0] = Eval();
-      bwd_costs[v][v_rank][0] = Eval();
-    }
   }
 
   for (std::size_t i = 1; i < route.size(); ++i) {
@@ -147,8 +144,8 @@ void SolutionState::update_priorities(const std::vector<Index>& route,
 }
 
 void SolutionState::set_node_gains(const std::vector<Index>& route, Index v) {
-  node_gains[v] = std::vector<Eval>(route.size());
-  edge_evals_around_node[v] = std::vector<Eval>(route.size());
+  node_gains[v].assign(route.size(), {});
+  edge_evals_around_node[v].assign(route.size(), {});
 
   if (route.empty()) {
     return;
@@ -269,8 +266,8 @@ void SolutionState::set_node_gains(const std::vector<Index>& route, Index v) {
 void SolutionState::set_edge_gains(const std::vector<Index>& route, Index v) {
   const std::size_t nb_edges = (route.size() < 2) ? 0 : route.size() - 1;
 
-  edge_gains[v] = std::vector<Eval>(nb_edges);
-  edge_evals_around_edge[v] = std::vector<Eval>(nb_edges);
+  edge_gains[v].assign(nb_edges, {});
+  edge_evals_around_edge[v].assign(nb_edges, {});
 
   if (route.size() < 2) {
     return;
@@ -397,7 +394,7 @@ void SolutionState::set_pd_gains(const std::vector<Index>& route, Index v) {
   // after set_node_gains. Expects to have valid values in
   // matching_delivery_rank, so should be run after
   // set_pd_matching_ranks.
-  pd_gains[v] = std::vector<Eval>(route.size());
+  pd_gains[v].assign(route.size(), {});
 
   const auto& vehicle = _input.vehicles[v];
 
@@ -464,8 +461,8 @@ void SolutionState::set_pd_gains(const std::vector<Index>& route, Index v) {
 
 void SolutionState::set_pd_matching_ranks(const std::vector<Index>& route,
                                           Index v) {
-  matching_delivery_rank[v] = std::vector<Index>(route.size());
-  matching_pickup_rank[v] = std::vector<Index>(route.size());
+  matching_delivery_rank[v].assign(route.size(), {});
+  matching_pickup_rank[v].assign(route.size(), {});
 
   std::unordered_map<Index, Index> pickup_route_rank_to_input_rank;
   std::unordered_map<Index, Index> delivery_input_rank_to_route_rank;
@@ -501,23 +498,19 @@ void SolutionState::set_pd_matching_ranks(const std::vector<Index>& route,
 }
 
 void SolutionState::set_insertion_ranks(const RawRoute& r, Index v) {
-  insertion_ranks_end[v] =
-    std::vector<Index>(_input.jobs.size(), r.route.size() + 1);
-  insertion_ranks_begin[v] = std::vector<Index>(_input.jobs.size(), 0);
+  insertion_ranks_end[v].assign(_input.jobs.size(), r.route.size() + 1);
+  insertion_ranks_begin[v].assign(_input.jobs.size(), 0);
 
-  weak_insertion_ranks_end[v] =
-    std::vector<Index>(_input.jobs.size(), r.route.size() + 1);
-  weak_insertion_ranks_begin[v] = std::vector<Index>(_input.jobs.size(), 0);
+  weak_insertion_ranks_end[v].assign(_input.jobs.size(), r.route.size() + 1);
+  weak_insertion_ranks_begin[v].assign(_input.jobs.size(), 0);
 }
 
 void SolutionState::set_insertion_ranks(const TWRoute& tw_r, Index v) {
-  insertion_ranks_end[v] =
-    std::vector<Index>(_input.jobs.size(), tw_r.route.size() + 1);
-  insertion_ranks_begin[v] = std::vector<Index>(_input.jobs.size(), 0);
+  insertion_ranks_end[v].assign(_input.jobs.size(), tw_r.route.size() + 1);
+  insertion_ranks_begin[v].assign(_input.jobs.size(), 0);
 
-  weak_insertion_ranks_end[v] =
-    std::vector<Index>(_input.jobs.size(), tw_r.route.size() + 1);
-  weak_insertion_ranks_begin[v] = std::vector<Index>(_input.jobs.size(), 0);
+  weak_insertion_ranks_end[v].assign(_input.jobs.size(), tw_r.route.size() + 1);
+  weak_insertion_ranks_begin[v].assign(_input.jobs.size(), 0);
 
   if (tw_r.empty()) {
     return;

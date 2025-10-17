@@ -78,7 +78,8 @@ void MixedExchange::apply() {
          (_input.jobs[t_route[t_rank]].type == JOB_TYPE::SINGLE &&
           _input.jobs[t_route[t_rank + 1]].type == JOB_TYPE::SINGLE));
 
-  std::vector<Index> s_job_ranks({s_route[s_rank]});
+  const std::array s_job_ranks{s_route[s_rank]};
+
   std::vector<Index> t_job_ranks;
   if (!reverse_t_edge) {
     auto t_start = t_route.begin() + t_rank;
